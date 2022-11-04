@@ -16,6 +16,7 @@
  */
 package com.google.cloud.teleport.templates;
 
+
 import org.apache.beam.sdk.Pipeline;
 import org.apache.beam.sdk.PipelineResult;
 import org.apache.beam.sdk.io.TextIO;
@@ -25,9 +26,6 @@ import org.apache.beam.sdk.options.PipelineOptions;
 import org.apache.beam.sdk.options.PipelineOptionsFactory;
 import org.apache.beam.sdk.options.Validation.Required;
 import org.apache.beam.sdk.options.ValueProvider;
-
-import org.apache.beam.sdk.transforms.DoFn;
-
 /**
  * The {@code TextToPubsub} pipeline publishes records to Cloud Pub/Sub from a set of files. The
  * pipeline reads each file row-by-row and publishes each record as a string message. At the moment,
@@ -96,29 +94,7 @@ public class TextJSONtoPubSub {
      *  2) Write each text record to Pub/Sub
      */
     pipeline
-        
         .apply("Read Text Data", TextIO.read().from(options.getInputFilePattern()))
-        .apply(
-            "Parse JSON from text",                     // the transform name
-            ParDo.of(new DoFn<String, String>() {    // a DoFn as an anonymous inner class instance
-                @ProcessElement
-                public void processElement(@Element String word, OutputReceiver<String> out) {
-                    JSONParser parser = new JSONParser();
-                    Object objs = null;
-                    try {
-                        objs = parser.parse(strLine);
-                    } catch (ParseException e) {
-                        e.printStackTrace();
-                    }
-                    JSONObject jsonObject =  (JSONObject) objs;
-                    Iterator<?> keys = objs.keys();
-                    while (keys.hasNext()){
-                        String key = (String) keys.next();
-                        String value = (String) jsonObject.get(key);
-                        out.output(key+','+value);
-                    }
-                }
-            }))
         .apply("Write to PubSub", PubsubIO.writeStrings().to(options.getOutputTopic()));
 
     return pipeline.run();
