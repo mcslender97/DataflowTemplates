@@ -26,6 +26,8 @@ import org.apache.beam.sdk.options.PipelineOptionsFactory;
 import org.apache.beam.sdk.options.Validation.Required;
 import org.apache.beam.sdk.options.ValueProvider;
 
+import org.apache.beam.ParDo;
+
 /**
  * The {@code TextToPubsub} pipeline publishes records to Cloud Pub/Sub from a set of files. The
  * pipeline reads each file row-by-row and publishes each record as a string message. At the moment,
